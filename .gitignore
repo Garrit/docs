@@ -1,0 +1,9 @@
+# LaTeX document compilation generates so many intermediary and cache files
+# that it makes sense to ignore everything...
+*
+!*/
+
+# ...except a few specific types of files.
+!.gitignore
+!*.tex
+!*.eps
