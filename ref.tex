@@ -99,16 +99,16 @@ byte-level comparison with reference output for that problem case. If the
 outputs match, the submission is scored as 100\%; otherwise, it is scored as
 0\%.
 
-\section{Negotiator}
+\section{Negotiator: Hub}
 \label{negotiator}
 
 \textbf{Source repository: \url{https://github.com/Garrit/negotiator}}
 
 The negotiator provides messaging services between all other components. The
-reference negotiator operates somewhat like a dumb pipe: submissions enter,
-pass from one component to another, and leave. It does correctly receive error
-indications from components and passes those errors along to the reporter, but
-it lacks retrial or failover abilities. It serves well in a demonstrative
-capacity due to its simplicity.
+reference negotiator, Hub, operates somewhat like a dumb pipe: submissions
+enter, pass from one component to another, and leave. It does correctly receive
+error indications from components and passes those errors along to the
+reporter, but it lacks retrial or failover abilities. It serves well in a
+demonstrative capacity due to its simplicity.
 
 \end{document}
