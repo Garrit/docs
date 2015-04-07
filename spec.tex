@@ -256,23 +256,96 @@ negotiator can connect to deliver messages.
 The formats of messages exchanged between components is noted in the
 \nameref{formats} section.
 
+In all cases, the component must respond with an appropriate HTTP error code.
+Unless otherwise noted, all calls invoke asynchronous actions and response
+bodies are optional.
+
+Only the minimal set of endpoints is defined here. Implementations may add
+custom endpoints as long as they do not conflict with this specification.
+
 \subsection{Common Endpoints}
 \label{endpoints-common}
+
+\subsubsection{\texttt{/status}}
+
+\emph{Verb: \texttt{GET}; body: \nameref{formats-status}}
+
+Provides some metrics and capabilities information from a running component.
+
+A request made to this endpoint does not require any body. The response
+describes the status of the component, and which capabilities it provides.
 
 \subsection{Submitter Endpoints}
 \label{endpoints-sub}
 
+This specification defines no endpoints for submitters.
+
 \subsection{Executor Endpoints}
 \label{endpoints-exec}
+
+\subsubsection{\texttt{/execute}}
+
+\emph{Verb: \texttt{POST}; body: \nameref{formats-reg-sub}}
+
+Enqueue a submission for compilation and execution.
 
 \subsection{Judge Endpoints}
 \label{endpoints-judge}
 
+\subsubsection{\texttt{/judge}}
+
+\emph{Verb: \texttt{POST}; body: \nameref{formats-exec}}
+
+Enqueue an execution for judgement.
+
 \subsection{Reporter Endpoints}
 \label{endpoints-report}
 
+\subsubsection{\texttt{/report}}
+
+\emph{Verb: \texttt{POST}; body: \nameref{formats-judge}}
+
+Release judging results for user consumption.
+
 \subsection{Negotiator Endpoints}
 \label{endpoints-hub}
+
+\subsubsection{\texttt{/submit}}
+
+\emph{Verb: \texttt{POST}; body: \nameref{formats-sub}}
+
+Introduce a submission into the system for evaluation. The submission may not
+be evaluated immediately, but will be queued for evaluation.
+
+The negotiator will respond to this request with a \nameref{formats-reg-sub}
+populated with the newly-generated unique ID for the submission.
+
+\subsubsection{\texttt{/execute/:id}}
+
+\emph{Verb: \texttt{POST}; body: \nameref{formats-exec}}
+
+Called by \hyperref[design-executor-judge]{executors} after having evaluated a
+submission.
+
+The \texttt{:id} parameter is the unique ID of the executed submission.
+
+\subsubsection{\texttt{/judge/:id}}
+
+\emph{Verb: \texttt{POST}; body: \nameref{formats-judge}}
+
+Called by \hyperref[design-executor-judge]{judges} after having evaluated an
+execution.
+
+The \texttt{:id} parameter is the unique ID of the judged submission.
+
+\subsubsection{\texttt{/error/:id}}
+
+\emph{Verb: \texttt{POST}; body: \nameref{formats-error}}
+
+Called by any component other than submitters upon encountering an error
+processing a submission.
+
+The \texttt{:id} parameter is the unique ID of the submission in error.
 
 \section{Message Formats}
 \label{formats}
