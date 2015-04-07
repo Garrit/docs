@@ -94,7 +94,7 @@ A system comprises of a collection of components, each providing one or more of
 five \emph{capabilities}. These components communicate with each other through
 JSON-encoded messages exchanged over HTTP via REST-like API endpoints exposed
 by the components. For more details on inter-component communication, see the
-\nameref{comm} section.
+\nameref{endpoints} section.
 
 \begin{figure}[h]
 \centering
@@ -244,8 +244,8 @@ occur during processing. The negotiator may provide an administrative interface
 allowing administrators to resubmit failed or erred submissions to the
 component in which the failure occurred.
 
-\section{Communication}
-\label{comm}
+\section{Communication Endpoints}
+\label{endpoints}
 
 Communication between components is accomplished through the exchange of
 JSON-encoded messages over HTTP connections. Each component which receives data
@@ -253,21 +253,43 @@ from within the system to do its job (i.e., every component implementing any
 capability other than that of a submitter) exposes REST endpoints to which the
 negotiator can connect to deliver messages.
 
-\subsection{Message Formats}
-\label{comm-formats}
+The formats of messages exchanged between components is noted in the
+\nameref{formats} section.
+
+\subsection{Common Endpoints}
+\label{endpoints-common}
+
+\subsection{Submitter Endpoints}
+\label{endpoints-sub}
+
+\subsection{Executor Endpoints}
+\label{endpoints-exec}
+
+\subsection{Judge Endpoints}
+\label{endpoints-judge}
+
+\subsection{Reporter Endpoints}
+\label{endpoints-report}
+
+\subsection{Negotiator Endpoints}
+\label{endpoints-hub}
+
+\section{Message Formats}
+\label{formats}
+
+\subsection{Submission}
+\label{formats-sub}
+
+A \emph{submission} is the basic representation of the source code submission
+fed into the system by the user. An example of this basic structure as a JSON
+document can be seen in \autoref{formats-sub-listing}.
 
 As a submission progresses through the chain of components, data is
 progressively added to the representation of the submission, and no existing
 data is redacted.
 
-\subsubsection{Submission}
-\label{comm-formats-sub}
-
-A \emph{submission} is the basic representation of the source code submission
-fed into the system by the user. An example of this basic structure as a JSON
-document can be seen in \autoref{comm-formats-sub-listing}.
-
-A submission has the following fields:
+Upon its initial introduction into the system, a submission has the following
+fields:
 
 \nopagebreak
 \begin{tabulary}{\textwidth}{ | l | l | L | }
@@ -321,14 +343,14 @@ Submission files are described as follows:
 }
 \end{lstlisting}
 \caption{The basic structure of a submission.}
-\label{comm-formats-sub-listing}
+\label{formats-sub-listing}
 \end{figure}
 
-\subsubsection{Registered Submission}
-\label{comm-formats-reg-sub}
+\subsection{Registered Submission}
+\label{formats-reg-sub}
 
 A \emph{registered submission} is the intermediary form of
-\hyperref[comm-formats-sub]{submission} produced by the negotiator immediately
+\hyperref[formats-sub]{submission} produced by the negotiator immediately
 after assigning it a numeric identifier. It differs from submissions in that it
 provides a field for the identifier.
 
@@ -344,8 +366,8 @@ Registered submissions add the following fields to submissions:
     \hline
 \end{tabulary}
 
-\subsubsection{Execution}
-\label{comm-formats-exec}
+\subsection{Execution}
+\label{formats-exec}
 
 An \emph{execution} represents the results of an
 \hyperref[design-executor-judge]{executor} having compiled and executed a
@@ -379,12 +401,12 @@ The format of execution case results is as follows:
     \hline
 \end{tabulary}
 
-\subsubsection{Judgement}
-\label{comm-formats-judge}
+\subsection{Judgement}
+\label{formats-judge}
 
 A \emph{judgement} represents the results of a
 \hyperref[design-executor-judge]{judge} having evaluated an
-\hyperref[comm-formats-exec]{execution} for correctness. No fields are added to
+\hyperref[formats-exec]{execution} for correctness. No fields are added to
 the submission object, but the following fields are added to the execution case
 object:
 
@@ -409,8 +431,8 @@ object:
     \hline
 \end{tabulary}
 
-\subsubsection{Error}
-\label{comm-formats-error}
+\subsection{Error}
+\label{formats-error}
 
 In the event of an error occurring at any stage during submission processing,
 the component encountering the error ceases to process the erroneous submission
@@ -444,10 +466,10 @@ exchanges, the same message format is used:
     \texttt{message} & string & An error message. \emph{Optional.} \\
     \hline
     \texttt{submission} & object & The submission causing the error. This
-        should be either a \hyperref[comm-formats-sub]{submission},
-        \hyperref[comm-formats-reg-sub]{registered submission},
-        \hyperref[comm-formats-exec]{execution}, or
-        \hyperref[comm-formats-judge]{judgement}. \\
+        should be either a \hyperref[formats-sub]{submission},
+        \hyperref[formats-reg-sub]{registered submission},
+        \hyperref[formats-exec]{execution}, or
+        \hyperref[formats-judge]{judgement}. \\
     \hline
 \end{tabulary}
 
@@ -471,10 +493,10 @@ The following error types are possible:
     \hline
 \end{tabulary}
 
-\subsubsection{Status}
-\label{comm-formats-status}
+\subsection{Status}
+\label{formats-status}
 
-Each component must provide a \hyperref[comm-endpoints-common]{status} endpoint
+Each component must provide a \hyperref[endpoints-common]{status} endpoint
 providing insight into its state and availability. The object representing the
 status must provide the following fields:
 
@@ -493,26 +515,5 @@ status must provide the following fields:
         values. \\
     \hline
 \end{tabulary}
-
-\subsection{Communication Endpoints}
-\label{comm-endpoints}
-
-\subsubsection{Common Endpoints}
-\label{comm-endpoints-common}
-
-\subsubsection{Submitter Endpoints}
-\label{comm-endpoints-sub}
-
-\subsubsection{Executor Endpoints}
-\label{comm-endpoints-exec}
-
-\subsubsection{Judge Endpoints}
-\label{comm-endpoints-judge}
-
-\subsubsection{Reporter Endpoints}
-\label{comm-endpoints-report}
-
-\subsubsection{Negotiator Endpoints}
-\label{comm-endpoints-hub}
 
 \end{document}
