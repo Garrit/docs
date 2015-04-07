@@ -156,7 +156,7 @@ a desktop client, a command line utility, an IRC bot, etc. Typically, the
 submitter and reporter will be tied together, conceptually if not concretely.
 
 \subsection{Executors and Judges}
-\label{design-executor-judge}
+\label{design-exec-judge}
 
 Executors and judges, while performing different operations, both essentially
 act as ``filter programs'': they take some input data (the problem submission),
@@ -324,7 +324,7 @@ populated with the newly-generated unique ID for the submission.
 
 \emph{Verb: \texttt{POST}; body: \nameref{formats-exec}}
 
-Called by \hyperref[design-executor-judge]{executors} after having evaluated a
+Called by \hyperref[design-exec-judge]{executors} after having evaluated a
 submission.
 
 The \texttt{:id} parameter is the unique ID of the executed submission.
@@ -333,7 +333,7 @@ The \texttt{:id} parameter is the unique ID of the executed submission.
 
 \emph{Verb: \texttt{POST}; body: \nameref{formats-judge}}
 
-Called by \hyperref[design-executor-judge]{judges} after having evaluated an
+Called by \hyperref[design-exec-judge]{judges} after having evaluated an
 execution.
 
 The \texttt{:id} parameter is the unique ID of the judged submission.
@@ -443,7 +443,7 @@ Registered submissions add the following fields to submissions:
 \label{formats-exec}
 
 An \emph{execution} represents the results of an
-\hyperref[design-executor-judge]{executor} having compiled and executed a
+\hyperref[design-exec-judge]{executor} having compiled and executed a
 registered submission against a problem set. The following fields are added to
 the object:
 
@@ -478,7 +478,7 @@ The format of execution case results is as follows:
 \label{formats-judge}
 
 A \emph{judgement} represents the results of a
-\hyperref[design-executor-judge]{judge} having evaluated an
+\hyperref[design-exec-judge]{judge} having evaluated an
 \hyperref[formats-exec]{execution} for correctness. No fields are added to
 the submission object, but the following fields are added to the execution case
 object:
@@ -513,6 +513,7 @@ and reports the failure back to the negotiator. In turn, the negotiator informs
 \hyperref[design-reporter]{reporters} of the failure. In both of these
 exchanges, the same message format is used:
 
+\nopagebreak
 \begin{tabulary}{\textwidth}{ | l | l | L | }
     \hline
     \textbf{Key} & \textbf{Type} & \textbf{Value} \\
@@ -548,6 +549,7 @@ exchanges, the same message format is used:
 
 The following error types are possible:
 
+\nopagebreak
 \begin{tabulary}{\textwidth}{ | l | L | }
     \hline
     \textbf{Error Type} & \textbf{Description} \\
@@ -573,6 +575,7 @@ Each component must provide a \hyperref[endpoints-common]{status} endpoint
 providing insight into its state and availability. The object representing the
 status must provide the following fields:
 
+\nopagebreak
 \begin{tabulary}{\textwidth}{ | l | l | L | }
     \hline
     \textbf{Key} & \textbf{Type} & \textbf{Value} \\
@@ -588,5 +591,61 @@ status must provide the following fields:
         values. \\
     \hline
 \end{tabulary}
+
+For each capability provided by the component, the \texttt{provides} object has
+a property with that capability name storing an object with information about
+the status of that particular capability. A JSON example of the status which
+might be returned by a component implementing the judge capability can be seen
+in \autoref{formats-status-listing}.
+
+For the \hyperref[design-exec-judge]{execution and judge} capabilities,
+the following fields must be populated:
+
+\nopagebreak
+\begin{tabulary}{\textwidth}{ | l | l | L | }
+    \hline
+    \textbf{Key} & \textbf{Type} & \textbf{Value} \\
+    \hline
+    \texttt{languages} & array & An array of strings, each naming a programming
+        language, submissions written in which the component is capable of
+        evaluating. \\
+    \hline
+    \texttt{problems} & array & An array of strings, each naming a problem the
+        component is capable of evaluating. \\
+    \hline
+    \texttt{queued} & array & An array of submission IDs which have been
+        delivered to this component but have not yet been evaluated. \\
+    \hline
+\end{tabulary}
+
+For the \hyperref[design-reporter]{reporter} and
+\hyperref[design-hub]{negotiator} capabilities, no specific status information
+is required, so the component may report an empty status object.
+
+The definition of a ``submitter'' property is absent because submitters always
+instigate communication with the negotiator. As such, the negotiator need not
+have direct insight into the submitter.
+
+Additional, implementation-specific properties are permitted on any of these
+objects providing they do not collide with specification-defined properties or
+violate specification-defined behaviour.
+
+\begin{figure}
+\begin{lstlisting}
+{
+    "name": "judge-00",
+    "uptime": "492",
+    "provides": {
+        "judge": {
+            "languages": ["c", "java"],
+            "problems": ["comp1123a1", "comp2103a2"],
+            "queued": []
+        }
+    }
+}
+\end{lstlisting}
+\caption{An example status response for a \hyperref[design-exec-judge]{judge}.}
+\label{formats-status-listing}
+\end{figure}
 
 \end{document}
