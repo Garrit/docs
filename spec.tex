@@ -61,28 +61,29 @@ Module Architecture and Communictations}
 \section{Introduction}
 \label{introduction}
 
-An online judge is a broad term for a software system which receives source
+``Online judge'' is a broad term for a software system which receives source
 code submissions from users, compiles and runs them against a set of input
 data, and judges the output of the submission against reference output. In
 practice, online judges take several different forms: challenge archives like
-UVa~Online~Judge\footnote{\url{http://uva.onlinejudge.org/}}, live competitions
+UVa~Online~Judge\footnote{\url{http://uva.onlinejudge.org/}}; live competitions
 like Google~Code~Jam\footnote{\url{http://code.google.com/codejam/}} and the
-ACM~ICPC\footnote{\url{http://icpc.baylor.edu/}}, and hybrids like
+ACM~ICPC\footnote{\url{http://icpc.baylor.edu/}}; and hybrids like
 Kattis\footnote{\url{https://open.kattis.com/}}. The Garrit project is an
-attempt to design a modular architecture upon which any of these forms of judge
-can be implemented. A greenfield approach was taken on the basis that the most
-widely-used existing solutions are either closed-source (for example,
-PC\textasciicircum2\footnote{\url{http://www.ecs.csus.edu/pc2/}}) or are
-specifically focused on providing the functionality required by only one form
-of online judge (e.g., DOMjudge\footnote{\url{http://www.domjudge.org/}}).
+attempt to design a modular architecture upon which any of these forms of
+online judges can be implemented. A new project was started on the basis that
+the most widely-used existing solutions were inappropriate for modification,
+either because they are closed-source (for example,
+PC\textasciicircum2\footnote{\url{http://www.ecs.csus.edu/pc2/}}), or because
+they are specifically focused on providing the functionality required by only
+one form of online judge
+(e.g., DOMjudge\footnote{\url{http://www.domjudge.org/}}).
 
 In addition to the capability descriptions provided in this document, Garrit
 prescribes a common format for problem definitions. This format is described in
 the document \emph{Garrit:~Problem~Definition~Format}.
 
-The Garrit project also provides reference implementations of components for
-each system capability. The source code repositories for these projects are
-accessible via the
+Garrit also provides reference implementations for each system capability.
+The source code repositories for these projects are accessible via the
 Garrit~GitHub~organization\footnote{\url{https://github.com/Garrit/}}, and are
 described in the document \emph{Garrit:~Reference~Implementations~Explained}.
 
@@ -90,11 +91,11 @@ described in the document \emph{Garrit:~Reference~Implementations~Explained}.
 \label{design}
 
 Garrit defines a microservices-oriented approach to infrastructure modularity.
-A system comprises of a collection of components, each providing one or more of
-five \emph{capabilities}. These components communicate with each other through
-JSON-encoded messages exchanged over HTTP via REST-like API endpoints exposed
-by the components. For more details on inter-component communication, see the
-\nameref{endpoints} section.
+A system is comprised of a collection of components, each providing one or more
+of five \emph{capabilities}. These components communicate with each other
+through JSON-encoded messages exchanged over HTTP via REST-like API endpoints
+exposed by the components. For more details on inter-component communication,
+see the \nameref{endpoints} section.
 
 \begin{figure}[h]
 \centering
@@ -125,19 +126,19 @@ evaluating a user submission:
 
 \begin{itemize}
 \item Submitters receive problem submissions from users, perhaps by way of a
-web interface or client program, and act as an injection point for those
-problems into the rest of the system.
+web interface or client program, and act as an entry point into the rest of the
+system.
 \item Executors perform actions upon problem submissions: compilation and
 execution, static analysis, etc.
 \item Judges process the output of executors to determine a score for problem
 submissions. This could be comparison of program output to a ``known good''
 output, or simply reformatting program output.
 \item Reporters make judging results available to end users. They may be
-integrated into the submission interface, provide details via e-mail, etc.
+integrated into the submission interface, provided over e-mail, etc.
 \item Negotiators provide a messaging backbone upon which all other components
 can communicate. Instead of talking directly to each other, components address
-the negotiator, causing the negotiator to instruct another component to perform
-some task.
+the negotiator causing the it to instruct another component to perform some
+task.
 \end{itemize}
 
 A functional environment will consist of a collection of one or more components
@@ -161,22 +162,20 @@ Executors and judges, while performing different operations, both essentially
 act as ``filter programs'': they take some input data (the problem submission),
 perform some processing (compilation and execution or judging), and output
 other data (program execution results or judging conclusions). This gives
-plenty of implementation flexibility: requests can be handled serially, or in
-parallel by multiple worker threads, or batched (if there ever were a problem
+plenty of implementation flexibility: requests can be handled serially, in
+parallel by multiple worker threads, batched (if there ever were a problem
 to take advantage of such a mechanism), or whatever else you can think of.
 
-The executor will need access to at least the problem case input for the
-problem for which a user submission is a potential solution, and the judge to
-the case output. However, the executor is, by definition, relegated to
-evaluating untrusted, user-submitted programs, so some means of isolation is
-necessary. Implementations should be very careful in this regard, especially
-when using multiple judges for the same problems simultaneously (e.g., to
-provide execution support for multiple languages).
+As the executor is, by definition, relegated to evaluating untrusted,
+user-submitted programs, some means of isolation for the execution environment
+is necessary. Implementations should be very careful in protecting the secret
+input data of problem sets, and should at the very least restrict the network
+access of submitted programs.
 
-The judge, in turn, could approach the task of comparing the case output to the
-execution output from a couple of different angles. The most straightforward is
-an exact file comparison, which rapidly falls apart in the face of problems
-with subjective output or multiple correct output options. While these problems
+The judge could approach the task of comparing the case output to the execution
+output from a couple of different angles. The most straightforward is an exact
+file comparison, which rapidly falls apart in the face of problems with
+subjective output or multiple correct output options. While these problems
 can often be minimized through careful construction of the problem definition,
 it is still nice to have options. As such, a more flexible judge might support
 judging output consisting of one regular expression per line against which
@@ -198,21 +197,20 @@ reporting and submission capabilities could be built into the same component.
 \subsection{Negotiator}
 \label{design-hub}
 
-The negotiator ties all other components together. Acting as a sort of hub,
-modules in a system do not pass messages directly to each other, but rather
-indicate to the negotiator that they have finished a task and that successive
-modules should be notified. By introducing an intermediary to handle
-inter-module messaging, two benefits are realized: modules are forced to remain
-compliant with the messaging specification, and more complex message routing
-may be accomplished. For example, a system may have multiple executors, one for
-each supported language; the negotiator, upon receiving a submisison,
-determines which executor(s) are capable of receiving the submission, and
-relays it appropriately.
+The negotiator ties all other components together. Modules in a system do not
+pass messages directly to each other, but rather indicate to the negotiator
+that they have finished a task and that successive modules should be notified.
+By introducing an intermediary to handle inter-module messaging, two benefits
+are realized: modules are forced to remain compliant with the messaging
+specification, and more complex message routing may be accomplished. For
+example, a system may have multiple executors, one for each supported language;
+the negotiator, upon receiving a submisison, determines which executor(s) are
+capable of receiving the submission, and relays it appropriately.
 
 A negotiator ought to be configured with a list of all components with which it
 shall communicate. Because components report which capabilities they provide,
 it is not necessary for such a configuration to ``bin'' lists of components per
-capability; in fact, given the possibility of components providing multiple
+capability. In fact, given the possibility of components providing multiple
 capabilities, it would be preferable if it did not.
 
 On startup, a negotiator should interrogate all configured components to
@@ -220,8 +218,8 @@ understand which capabilities are available, and to build a map of which
 languages and problems can be processed by which components. It would be
 strongly preferable for the negotiator to provide an interface by which this
 task can be performed again during normal operation to save restarting the
-whole negotiator in the event of the arrival of new problem definitions,
-languages, etc. (Consider a classroom environment where new problems may be
+whole negotiator in the event of the arrival of new problem definitions or
+languages. (Consider a classroom environment where new problems may be
 introduced over the course of a semester.)
 
 Upon receiving a submission, the negotiator will assign it a unique integer
@@ -241,8 +239,8 @@ reevaluated.
 
 Other components will report back to the negotiator with errors should any
 occur during processing. The negotiator may provide an administrative interface
-allowing administrators to resubmit failed or erred submissions to the
-component in which the failure occurred.
+allowing administrators to resubmit failed submissions to the component in
+which the failure occurred.
 
 \section{Communication Endpoints}
 \label{endpoints}
