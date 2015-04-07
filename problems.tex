@@ -1,0 +1,212 @@
+\documentclass[11pt,letterpaper]{article}
+
+% Enable the inclusion of EPS-format graphics.
+\usepackage{epsfig}
+% Used to handle line spacing. Must be loaded before hyperref.
+\usepackage{setspace}
+% Clickable links.
+\usepackage[bookmarks,colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+% Code listings via \lstlisting.
+\usepackage{listings}
+% Multirow table cell spanning.
+\usepackage{multirow}
+% Zero paragraph indent and non-zero paragraph separation.
+\usepackage{parskip}
+% Tables with flexible-width columns.
+\usepackage{tabulary}
+% Diagrams and stuff.
+\usepackage{tikz}
+
+% Set document fonts: Times as the default Roman font, Helvetica for
+% sans-serif, Courier for teletype.
+\renewcommand{\rmdefault}{ptm}
+\renewcommand{\sfdefault}{phv}
+\renewcommand{\ttdefault}{pcr}
+
+% I want captions to have slightly smaller text and a bold label.
+\usepackage[font=small,labelfont=bf]{caption}
+
+% Customize formatting for code listings.
+\lstset{
+    basicstyle={\small\ttfamily}
+}
+
+% LaTeX' default line spacing is a little tight for my liking.
+\setstretch{1.15}
+
+\begin{document}
+
+\title{\includegraphics[width=0.75\textwidth]{logo.eps}\\
+Problem Definition Format}
+\author{Samuel Coleman}
+\date{\today}
+
+% Turn off index link generation for the unnumbered title page so we don't get
+% a warning about a missing page.
+\hypersetup{pageanchor=false}
+\begin{titlepage}
+
+\maketitle
+% Ditch the page styling (including page number) for the title page.
+\thispagestyle{empty}
+
+\end{titlepage}
+% Having generated the page, we can turn index link generation back on.
+\hypersetup{pageanchor=true}
+
+\tableofcontents
+
+\newpage
+
+\section{Introduction}
+\label{introduction}
+
+In lieu of the absence of a standard format for distributing problems sets for
+online judges, Garrit proposes that components implementing the rest of its
+interfaces seek to maintain compatibility with the problem format used by its
+reference components.
+
+Problem sets are considered to have three components: the description, which
+educates the user about the problem being solved and introduces the constraints
+and expectations of the solution; sample data or ``samples'', which help the
+user better understand the definition and implement their solution; and judging
+data or ``cases'', against which user submissions are judged. The latter two
+components consist primarily of input data to be fed into submissions, and
+output data against which the submitted program output is to be compared.
+
+\section{Organization}
+\label{organization}
+
+Each problem set should be stored in its own directory, named as the problem.
+At minimum, the directory must contain the problem definition as a JSON
+document in a file named \texttt{problem.json}, described below. It is strongly
+recommended that the directory also contain a ``readme'' file, and that the
+problem definition leverage the contents of this file as the problem
+description.
+
+Sample problem definitions are available as part of
+Garrit\footnote{\url{https://github.com/Garrit/problems}}. As an example, here
+is the directory structure for the ``echo'' example:
+
+\begin{tabular}{ l l }
+    \texttt{echo/} & Root directory \\
+    \texttt{\hphantom{echo/}problem.json} & Problem definition \\
+    \texttt{\hphantom{echo/}README.md} & Problem description \\
+    \texttt{\hphantom{echo/}samples/} & Sample input/output data \\
+    \texttt{\hphantom{echo/samples/}sample.in} & \hphantom{Sample} input \\
+    \texttt{\hphantom{echo/samples/}sample.out} & \hphantom{Sample} output \\
+    \texttt{\hphantom{echo/}cases/} & Secret judging data \\
+    \texttt{\hphantom{echo/cases/}case1.in} & \hphantom{Secret} input \#1 \\
+    \texttt{\hphantom{echo/cases/}case1.out} & \hphantom{Secret} output \#1 \\
+    \texttt{\hphantom{echo/cases/}case2.in} & \hphantom{Secret} input \#2 \\
+    \texttt{\hphantom{echo/cases/}case2.out} & \hphantom{Secret} output \#2 \\
+\end{tabular}
+
+This structure is, while consistent throughout the sample problems, entirely
+arbitrary and controlled by the problem definition. While it might be nice for
+others using your problem sets if they follow a logical ordering, no structure
+beyond the placement of \texttt{problem.json} is enforced.
+
+\section{Problem Definition Format}
+\label{format}
+
+The file \texttt{problem.json} must contain a JSON object with the following
+properties:
+
+\nopagebreak
+\begin{tabulary}{\textwidth}{ | l | l | L | }
+    \hline
+    \textbf{Key} & \textbf{Type} & \textbf{Value} \\
+    \hline
+    \texttt{name} & string & The name of the problem set. Should be consistent
+        with the name of the directory in which the problem definition is
+        stored. \\
+    \hline
+    \texttt{description} & string & The problem description. We suggest the use
+        of
+        Markdown\footnote{\url{http://daringfireball.net/projects/markdown/}}
+        or a derivative syntax for formatting.
+        \newline
+        \emph{May not be present if the \texttt{descriptionFile} property is
+        present.} \\
+    \hline
+    \texttt{timeLimit} & integer & A default limit in seconds for the execution
+        time of each case. If not specified, the execution environment may
+        impose its own limit. \emph{Optional.} \\
+    \hline
+    \texttt{memoryLimit} & integer & A default limit in bytes for the memory
+        consumption of each case. If not specified, the execution environment
+        may impose its own limit. \emph{Optional.} \\
+    \hline
+    \texttt{descriptionFile} & string & The name of a file within the problem
+        set directory containing the problem description. As with descriptions
+        embedded within the problem definition, Markdown formatting syntax is
+        suggested.
+        \newline
+        \emph{May not be present if the \texttt{description} property is
+        present.} \\
+    \hline
+    \texttt{samples} & array & An array of objects containing sample data for
+        the user. \\
+    \hline
+    \texttt{cases} & array & An array of objects containing the secret judging
+        data. \\
+    \hline
+\end{tabulary}
+
+Each object describing a sample should have the following properties:
+
+\nopagebreak
+\begin{tabulary}{\textwidth}{ | l | l | L | }
+    \hline
+    \textbf{Key} & \textbf{Type} & \textbf{Value} \\
+    \hline
+    \texttt{name} & string & A name identifying the data set. It should be
+        unique within the problem set. \\
+    \hline
+    \texttt{input} & string & The problem input data. As with the
+        \texttt{description} and \texttt{descriptionFile} properties of the
+        top-level problem set object, the input data may be either provided
+        within the problem definition, or held in an external file.
+        \newline
+        \emph{May not be present if the \texttt{inputFile} property is
+        present.} \\
+    \hline
+    \texttt{inputFile} & string & The name of a file within the problem
+        set directory containing the sample input.
+        \newline
+        \emph{May not be present if the \texttt{input} property is present.} \\
+    \hline
+    \texttt{output} & string & Expected output of a solution for the
+        corresponding input.
+        \newline
+        \emph{May not be present if the \texttt{outputFile} property is
+        present.} \\
+    \hline
+    \texttt{outputFile} & string & The name of a file within the problem
+        set directory containing the sample output.
+        \newline
+        \emph{May not be present if the \texttt{output} property is present.}
+        \\
+    \hline
+\end{tabulary}
+
+Objects describing cases are identical to those describing samples, but may
+optionally have extra parameters:
+
+\nopagebreak
+\begin{tabulary}{\textwidth}{ | l | l | L | }
+    \hline
+    \textbf{Key} & \textbf{Type} & \textbf{Value} \\
+    \hline
+    \texttt{timeLimit} & integer & A limit in seconds for the execution time of
+        the case. Overrides any default limit specified in the problem
+        definition. \emph{Optional.} \\
+    \hline
+    \texttt{memoryLimit} & integer & A limit in bytes for the memory
+        consumption of the case. Overrides any default limit specified in the
+        problem definition. \emph{Optional.} \\
+    \hline
+\end{tabulary}
+
+\end{document}
