@@ -1,0 +1,114 @@
+\documentclass[11pt,letterpaper]{article}
+
+% Enable the inclusion of EPS-format graphics.
+\usepackage{epsfig}
+% Used to handle line spacing. Must be loaded before hyperref.
+\usepackage{setspace}
+% Clickable links.
+\usepackage[bookmarks,colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+% Code listings via \lstlisting.
+\usepackage{listings}
+% Multirow table cell spanning.
+\usepackage{multirow}
+% Zero paragraph indent and non-zero paragraph separation.
+\usepackage{parskip}
+% Tables with flexible-width columns.
+\usepackage{tabulary}
+% Diagrams and stuff.
+\usepackage{tikz}
+
+% Set document fonts: Times as the default Roman font, Helvetica for
+% sans-serif, Courier for teletype.
+\renewcommand{\rmdefault}{ptm}
+\renewcommand{\sfdefault}{phv}
+\renewcommand{\ttdefault}{pcr}
+
+% I want captions to have slightly smaller text and a bold label.
+\usepackage[font=small,labelfont=bf]{caption}
+
+% Customize formatting for code listings.
+\lstset{
+    basicstyle={\small\ttfamily}
+}
+
+% LaTeX' default line spacing is a little tight for my liking.
+\setstretch{1.15}
+
+\begin{document}
+
+\title{\includegraphics[width=0.75\textwidth]{logo.eps}\\
+Reference Implementations Explained}
+\author{Samuel Coleman}
+\date{\today}
+
+% Turn off index link generation for the unnumbered title page so we don't get
+% a warning about a missing page.
+\hypersetup{pageanchor=false}
+\begin{titlepage}
+
+\maketitle
+% Ditch the page styling (including page number) for the title page.
+\thispagestyle{empty}
+
+\end{titlepage}
+% Having generated the page, we can turn index link generation back on.
+\hypersetup{pageanchor=true}
+
+\tableofcontents
+
+\newpage
+
+\section{Introduction}
+\label{introduction}
+
+To demonstrate the validity of the Garrit architecture, reference
+implementations are provided covering all capabilities. These may form part of
+a production environment, a basis for further component development, or simply
+be used to demonstrate a functioning example of the system.
+
+\section{Submitter and Reporter: Subport}
+\label{subport}
+
+\textbf{Source repository: \url{https://github.com/Garrit/subport}}
+
+Subport provides a web interface through which individuals can submit source
+code for evaluation against a problem. In turn, it pushes the submission into
+the negotiator. After the submission has been evaluated, it stores the judging
+results to disk, and uses this data to provide web interface which shows a list
+of all submissions. The user can ``drill down'' into each submission to view
+the input source code and the output of the submission for each problem case.
+
+\section{Executor}
+\label{executor}
+
+\textbf{Source repository: \url{https://github.com/Garrit/executor}}
+
+The reference executor runs submitted source code in a contained environment by
+leveraging Linux containers (LXC). Based on the problem selected for a
+submission, the executor feeds input into the program and record its output and
+the time consumed to generate said output. The executor also limits execution
+time so that programs cannot ``run away'' and monopolize system resources.
+
+\section{Judge}
+\label{judge}
+
+\textbf{Source repository: \url{https://github.com/Garrit/judge}}
+
+For each execution case of an execution, the reference judge performs a
+byte-level comparison with reference output for that problem case. If the
+outputs match, the submission is scored as 100\%; otherwise, it is scored as
+0\%.
+
+\section{Negotiator}
+\label{negotiator}
+
+\textbf{Source repository: \url{https://github.com/Garrit/negotiator}}
+
+The negotiator provides messaging services between all other components. The
+reference negotiator operates somewhat like a dumb pipe: submissions enter,
+pass from one component to another, and leave. It does correctly receive error
+indications from components and passes those errors along to the reporter, but
+it lacks retrial or failover abilities. It serves well in a demonstrative
+capacity due to its simplicity.
+
+\end{document}
